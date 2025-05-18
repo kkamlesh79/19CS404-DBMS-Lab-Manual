@@ -33,6 +33,42 @@ END;
 **Expected Output:**
 - A new entry is added to the `employee_log` table each time a new record is inserted into the `employees` table.
 
+**Program:**
+
+```sql
+-- Create main and log tables
+CREATE TABLE employees (
+    emp_id NUMBER PRIMARY KEY,
+    emp_name VARCHAR2(100),
+    salary NUMBER
+);
+CREATE TABLE employee_log (
+    log_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    emp_id NUMBER,
+    emp_name VARCHAR2(100),
+    salary NUMBER,
+    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message VARCHAR2(255)
+);
+-- Trigger to log insert
+CREATE OR REPLACE TRIGGER trg_log_employee_insert
+AFTER INSERT ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO employee_log (emp_id, emp_name, salary, message)
+    VALUES (:NEW.emp_id, :NEW.emp_name, :NEW.salary,
+            'Inserted: ' || :NEW.emp_name || ', Salary: ' || :NEW.salary);
+END;
+/
+-- Test the trigger
+INSERT INTO employees VALUES (1, 'Alice', 5000);
+SELECT * FROM employee_log;
+```
+
+**Output:**
+
+![Screenshot 2025-05-17 084005](https://github.com/user-attachments/assets/e91be0b4-c101-4ed1-8246-df52abbe1fe7)
+
 ---
 
 ## 2. Write a trigger to prevent deletion of records from a sensitive table.
@@ -42,6 +78,32 @@ END;
 
 **Expected Output:**
 - If an attempt is made to delete a record from `sensitive_data`, an error message is raised, e.g., `ERROR: Deletion not allowed on this table.`
+
+**Program:**
+
+```sql
+-- Create table
+CREATE TABLE sensitive_data (
+    id NUMBER PRIMARY KEY,
+    secret_info VARCHAR2(255)
+);
+-- Insert test data
+INSERT INTO sensitive_data VALUES (1, 'Top Secret');
+-- Trigger to prevent delete
+CREATE OR REPLACE TRIGGER trg_prevent_sensitive_delete
+BEFORE DELETE ON sensitive_data
+FOR EACH ROW
+BEGIN
+    RAISE_APPLICATION_ERROR(-20001, 'ERROR: Deletion not allowed on this table.');
+END;
+/
+-- Test: This will raise an error
+DELETE FROM sensitive_data WHERE id = 1;
+```
+
+**Output:**
+
+![Screenshot 2025-05-17 084312](https://github.com/user-attachments/assets/719e637c-db00-4a6e-b794-865185c53389)
 
 ---
 
@@ -53,6 +115,35 @@ END;
 **Expected Output:**
 - The `last_modified` column in the `products` table is updated automatically to the current date and time when any record is updated.
 
+**Program:**
+
+```sql
+-- Create table with timestamp column
+CREATE TABLE products (
+    product_id NUMBER PRIMARY KEY,
+    product_name VARCHAR2(100),
+    price NUMBER,
+    last_modified TIMESTAMP
+);
+-- Insert test data
+INSERT INTO products VALUES (1, 'Monitor', 10000, NULL);
+-- Trigger to update last_modified on update
+CREATE OR REPLACE TRIGGER trg_update_last_modified
+BEFORE UPDATE ON products
+FOR EACH ROW
+BEGIN
+    :NEW.last_modified := SYSTIMESTAMP;
+END;
+/
+-- Test the trigger
+UPDATE products SET price = 12000 WHERE product_id = 1;
+SELECT * FROM products;
+```
+
+**Output:**
+
+![Screenshot 2025-05-17 084434](https://github.com/user-attachments/assets/382c0761-97a4-4621-80bb-05ef9ed24908)
+
 ---
 
 ## 4. Write a trigger to keep track of the number of updates made to a table.
@@ -63,6 +154,42 @@ END;
 **Expected Output:**
 - The `audit_log` table will maintain a count of how many updates have been made to the `customer_orders` table.
 
+**Program:**
+
+```sql
+-- Create main and audit tables
+CREATE TABLE customer_orders (
+    order_id NUMBER PRIMARY KEY,
+    customer_name VARCHAR2(100),
+    order_amount NUMBER
+);
+CREATE TABLE audit_log (
+    id NUMBER PRIMARY KEY,
+    update_count NUMBER
+);
+-- Insert test data
+INSERT INTO customer_orders VALUES (1, 'John Doe', 5000);
+INSERT INTO audit_log VALUES (1, 0);
+-- Trigger to count updates
+CREATE OR REPLACE TRIGGER trg_count_updates
+AFTER UPDATE ON customer_orders
+FOR EACH ROW
+BEGIN
+    UPDATE audit_log
+    SET update_count = update_count + 1
+    WHERE id = 1;
+END;
+/
+-- Test the trigger
+UPDATE customer_orders SET order_amount = 5500 WHERE order_id = 1;
+UPDATE customer_orders SET customer_name = "John Doee" WHERE order_id = 1;
+SELECT * FROM audit_log;
+```
+
+**Output:**
+
+![Screenshot 2025-05-17 084820](https://github.com/user-attachments/assets/b0b4d634-693a-4ae6-8e6f-9fb24e383b83)
+
 ---
 
 ## 5. Write a trigger that checks a condition before allowing insertion into a table.
@@ -72,6 +199,35 @@ END;
 
 **Expected Output:**
 - If the inserted salary in the `employees` table is below the condition (e.g., salary < 3000), the insert operation is blocked, and an error message is raised, such as: `ERROR: Salary below minimum threshold.`
+
+**Program:**
+
+```sql
+-- Create employees table
+CREATE TABLE employees (
+    emp_id NUMBER PRIMARY KEY,
+    emp_name VARCHAR2(100),
+    salary NUMBER
+);
+-- Trigger to block insert if salary < 3000
+CREATE OR REPLACE TRIGGER trg_salary_check
+BEFORE INSERT ON employees
+FOR EACH ROW
+BEGIN
+    IF :NEW.salary < 3000 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'ERROR: Salary below minimum threshold.');
+    END IF;
+END;
+/
+-- Test 1: Valid insert
+INSERT INTO employees VALUES (2, 'Bob', 4000);
+-- Test 2: Invalid insert (will raise error)
+INSERT INTO employees VALUES (3, 'Eve', 2500);
+```
+
+**Output:**
+
+![Screenshot 2025-05-17 085101](https://github.com/user-attachments/assets/5ccc8086-f2fd-4ce1-b6fb-e7820488f74d)
 
 ## RESULT
 Thus, the PL/SQL trigger programs were written and executed successfully.
