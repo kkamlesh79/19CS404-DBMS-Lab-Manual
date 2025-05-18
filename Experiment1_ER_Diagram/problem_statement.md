@@ -45,28 +45,130 @@ Design a database for patient management, appointments, medical records, and bil
    - Why you chose the entities and relationships.
    - How you modeled prerequisites or billing.
 
-# ER Diagram Submission - Student Name
+# ER Diagram Submission - Student Name - NARESHKUMARAN S
 
 ## Scenario Chosen:
 University / Hospital (choose one)
 
 ## ER Diagram:
-![ER Diagram](er_diagram.png)
+![image](https://github.com/user-attachments/assets/2467e60f-1a27-4626-93ee-30a859b3a414)
+
 
 ## Entities and Attributes:
-- Entity1: Attributes
-- Entity2: Attributes
-...
+
+LOGIN:
+
+Login_ID
+
+Login_username
+
+user_password
+
+Login_details
+
+FACULTY:
+
+Faculty_ID
+
+Faculty_Name
+
+Faculty_email_ID
+
+STUDENTS:
+
+Student_ID
+
+Stu_Name
+
+Stu_ph_no
+
+Stu_Pass
+
+Stu_parent_number
+
+Student_email
+
+AMOUNT / FEE:
+
+amount_pending
+
+Fee_paid
+
+Fee_details
+
+COURSE:
+
+Course_ID
+
+Course_name
+
+Course_hours
+
+Course_enroll
+
+REGISTRATION:
+
+Reg_ID
+
+Reg_capacity
+
+Reg_Date
+
+Reg_stu_ID
+
+COLLEGES:
+
+College_id
+
+College_type
+
+College_address
 
 ## Relationships and Constraints:
 - Relationship1 (Cardinality, Participation)
 - Relationship2 (Cardinality, Participation)
-...
+
+reg_management (between LOGIN and FACULTY/STUDENTS/AMOUNT)
+
+Manages authentication and access
+
+Cardinality: One-to-many from LOGIN to STUDENTS and FACULTY
+
+Participation: Total for STUDENTS and FACULTY (must log in)
+
+Manage (between STUDENTS and COURSE/REGISTRATION)
+
+Manages course registration
+
+Cardinality: One-to-many from STUDENTS to REGISTRATION
+
+Participation: Partial
+
+administration (between COURSE and COLLEGES)
+
+Links courses to the institution
+
+Cardinality: Many-to-one from COURSE to COLLEGES
+
+Participation: Total for COURSE
+
+
 
 ## Extension (Prerequisite / Billing):
-- Explain how you modeled prerequisites or billing.
+Billing is modeled using the AMOUNT / FEE entity. It includes attributes such as amount_pending, Fee_paid, and Fee_details. This entity is linked indirectly to STUDENTS via LOGIN and reg_management.
+
+Prerequisites could be extended by adding a recursive relationship within the COURSE entity, such as prerequisite_of, to indicate dependency between courses.
+
+
 
 ## Design Choices:
-Brief explanation of why you chose certain entities, relationships, and assumptions
+
+Each major participant in a college management system (students, faculty, colleges, etc.) is treated as a separate entity with appropriate attributes.
+
+Relationships such as reg_management, Manage, and administration model the actions (login, registration, and administration respectively) with clear cardinalities and participation constraints.
+
+The modular structure allows easy extension, such as adding billing or prerequisites, and fits well with a relational database model.
 
 ## RESULT
+
+Thus the concepts of ER modeling by creating an ER diagram for a real-world application for University database is applied and understood.
